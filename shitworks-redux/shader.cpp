@@ -2,13 +2,19 @@
 #include "swlog.h"
 
 #include <glad/glad.h>
+#include <glm/glm.hpp>
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <glm/gtc/type_ptr.hpp>
 
 using std::string;
 using std::ifstream;
 using std::stringstream;
+
+Shader::Shader() : Shader("default.vertex", "default.fragment") {
+	SWLOG("Initializing default shader");
+}
 
 Shader::Shader(const char* vertexPath, const char* fragPath)
 {
@@ -125,4 +131,9 @@ void Shader::setInt(const char* name, int value) const
 void Shader::setFloat(const char* name, float value) const
 {
 	glUniform1f(glGetUniformLocation(ID, name), value);
+}
+
+void Shader::setMat4(const char* name, const glm::mat4& matrix) const
+{
+	glUniformMatrix4fv(glGetUniformLocation(ID, name), 1, GL_FALSE, glm::value_ptr(matrix));
 }

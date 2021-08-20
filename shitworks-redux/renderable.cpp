@@ -3,10 +3,20 @@
 #include "renderable.h"
 #include "swlog.h"
 
-Renderable::Renderable(std::vector<float> vertices, std::vector<unsigned int> indices) {
+Renderable::Renderable(std::vector<float> vertices, std::vector<unsigned int> indices, Shader* shader) {
 	CreateVBO(vertices);
 	CreateEBO(indices);
 	CreateVAO();
+	this->shader = shader;
+	transform = glm::mat4(1.0f);
+}
+
+void Renderable::render()
+{
+	shader->activate();
+	shader->setMat4("transform", transform);
+	glBindVertexArray(VAO);
+	glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0);
 }
 
 void Renderable::CreateVBO(std::vector<float>& vertices) {
@@ -19,6 +29,7 @@ void Renderable::CreateEBO(std::vector<unsigned int>& indices) {
 	glGenBuffers(1, &EBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices.front(), GL_STATIC_DRAW);
+	numIndices = indices.size();
 }
 
 void Renderable::CreateVAO() {

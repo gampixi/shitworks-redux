@@ -12,5 +12,5 @@ uniform float fader;
 
 void main()
 {
-   FragColor = mix(texture(texture1, TexCoord), texture(texture2, TexCoord), fader);
+   FragColor = mix(texture(texture1, TexCoord), texture(texture2, TexCoord), fader) * (vertexColor, 1.0);
 }

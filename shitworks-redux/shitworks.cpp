@@ -1,5 +1,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <vector>
 
 #include "swlog.h"
@@ -24,19 +27,32 @@ Shader* shader;
 std::vector<Renderable> renderables;
 void sw_render(GLFWwindow* window) {
 	glClearColor(1.0f, 0.5255f, 0.0784f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	cabbage->activate(0);
 	gopnik->activate(1);
 
-	shader->activate();
-	shader->setInt("texture1", 0);
-	shader->setInt("texture2", 1);
-	shader->setFloat("fader", (sin(glfwGetTime() * 10) * 0.5f) + 0.5f);
+	// Do weird transform
+	auto model = glm::mat4(1.0f);
+	model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+	model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.2f, 0.3f, 0.6f));
+	model = glm::scale(model, glm::vec3(1.0f));
+
+	auto view = glm::mat4(1.0f);
+	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+
+	auto projection = glm::mat4(1.0f);
+	projection = glm::perspective(glm::radians(60.0f), 800.0f / 600.0f, 0.1f, 500.0f);
 
 	for (auto& r : renderables) {
-		glBindVertexArray(r.getVAO());
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		r.transform = model;
+		r.shader->activate();
+		r.shader->setMat4("projection", projection);
+		r.shader->setMat4("view", view);
+		r.shader->setInt("texture1", 0);
+		r.shader->setInt("texture2", 1);
+		r.shader->setFloat("fader", (sin(glfwGetTime() * 10) * 0.5f) + 0.5f);
+		r.render();
 	}
 }
 
@@ -67,38 +83,33 @@ int main(int argc, char* argv[]) {
 
 	glViewport(0, 0, 800, 600);
 	glfwSetFramebufferSizeCallback(window, sw_framebufferSizeCallback);
-
-	renderables.push_back(Renderable(
-		{
-	// positions		// colors			// tex coords
-	-0.1f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f,	1.0f, 1.0f,    // top right
-	-0.1f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,	1.0f, 0.0f,    // bottom right
-	-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,	0.0f, 0.0f,   // bottom left
-	-0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f,	0.0f, 1.0f     // top left 
-		},
-		{
-	0, 1, 3, // First triangle
-	1, 2, 3 // Second triangle
-		}
-	));
-
-	renderables.push_back(Renderable(
-		{
-	// positions		// colors			// tex coords
-	 0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f,	2.0f, 2.0f,  // top right
-	 0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,	2.0f, 0.0f,  // bottom right
-	 0.1f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,	0.0f, 0.0f, // bottom left
-	 0.1f,  0.5f, 0.0f, 0.0f, 0.0f, 0.0f,	0.0f, 2.0f   // top left 
-		},
-		{
-	0, 1, 3, // First triangle
-	1, 2, 3 // Second triangle
-		}
-	));
+	glEnable(GL_DEPTH_TEST);
 
 	shader = new Shader("default.vertex", "default.fragment");
 	cabbage = new Texture("cabbage_lady.png");
-	gopnik = new Texture("gopnik.jpg");
+	gopnik = new Texture("gopnik.jpg");https://www.youtube.com/watch?v=slXHhu86SaY&t=11s
+
+	renderables.push_back(Renderable(
+		{
+			// positions			// colors			// tex coords
+			-0.5f, -0.5f, -0.5f,	1.0f, 1.0f, 1.0f,	0.0f, 0.0f,    // top right
+			0.5f, -0.5f, -0.5f,		1.0f, 1.0f, 1.0f,	1.0f, 0.0f,    // top right
+			0.5f, 0.5f, -0.5f,		1.0f, 1.0f, 1.0f,	1.0f, 1.0f,    // top right
+			-0.5f, 0.5f, -0.5f,		1.0f, 1.0f, 1.0f,	0.0f, 1.0f,    // top right
+			-0.5f, -0.5f, 0.5f,		1.0f, 1.0f, 1.0f,	1.0f, 1.0f,    // top right
+			0.5f, -0.5f, 0.5f,		1.0f, 1.0f, 1.0f,	0.0f, 1.0f,    // top right
+			0.5f, 0.5f, 0.5f,		1.0f, 1.0f, 1.0f,	0.0f, 0.0f,    // top right
+			-0.5f, 0.5f, 0.5f,		1.0f, 1.0f, 1.0f,	1.0f, 0.0f,    // top right
+		},
+		{
+	0, 1, 3, 3, 1, 2,
+	1, 5, 2, 2, 5, 6,
+	5, 4, 6, 6, 4, 7,
+	4, 0, 7, 7, 0, 3,
+	3, 2, 7, 7, 2, 6,
+	4, 5, 0, 0, 5, 1
+		},
+		shader));
 
 	SWLOG("Starting main loop!");
 	// Main rendering loop
