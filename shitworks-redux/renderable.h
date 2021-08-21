@@ -2,6 +2,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include "shader.h"
+#include "transform.h"
 
 class Renderable {
 private:
@@ -14,7 +15,7 @@ private:
 	void CreateVAO();
 public:
 	Shader* shader;
-	glm::mat4 transform;
+	Transform transform;
 	Renderable(std::vector<float> vertices, std::vector<unsigned int> indices, Shader* shader);
 	// TODO: Destructor
 	unsigned int getVAO() { return VAO; }

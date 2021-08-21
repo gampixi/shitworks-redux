@@ -10,6 +10,7 @@
 #include "shader.h"
 #include "texture.h"
 #include "stb_image.h"
+#include "transform.h"
 
 void sw_framebufferSizeCallback(GLFWwindow* window, int width, int height) {
 	glViewport(0, 0, width, height);
@@ -25,6 +26,10 @@ Texture* cabbage;
 Texture* gopnik;
 Shader* shader;
 std::vector<Renderable> renderables;
+
+Transform cameraTransform;
+glm::mat4 cameraProjection = glm::perspective(glm::radians(60.0f), 800.0f / 600.0f, 0.1f, 500.0f);
+
 void sw_render(GLFWwindow* window) {
 	glClearColor(1.0f, 0.5255f, 0.0784f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -33,22 +38,20 @@ void sw_render(GLFWwindow* window) {
 	gopnik->activate(1);
 
 	// Do weird transform
-	auto model = glm::mat4(1.0f);
-	model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-	model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.2f, 0.3f, 0.6f));
-	model = glm::scale(model, glm::vec3(1.0f));
+	// auto model = glm::mat4(1.0f);
+	// model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+	// model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.2f, 0.3f, 0.6f));
+	// model = glm::scale(model, glm::vec3(1.0f));
 
-	auto view = glm::mat4(1.0f);
-	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-
-	auto projection = glm::mat4(1.0f);
-	projection = glm::perspective(glm::radians(60.0f), 800.0f / 600.0f, 0.1f, 500.0f);
+	// cameraTransform.rotation *= glm::quat(glm::vec3(0, 0, 0.01));
 
 	for (auto& r : renderables) {
-		r.transform = model;
+		r.transform.position.y = sin(glfwGetTime()) * 2;
+		r.transform.position.x = -cos(glfwGetTime()) * 2;
+		r.transform.rotation *= glm::quat(glm::vec3(0.01, 0, 0));
 		r.shader->activate();
-		r.shader->setMat4("projection", projection);
-		r.shader->setMat4("view", view);
+		r.shader->setMat4("projection", cameraProjection);
+		r.shader->setMat4("view", cameraTransform.getViewMatrix());
 		r.shader->setInt("texture1", 0);
 		r.shader->setInt("texture2", 1);
 		r.shader->setFloat("fader", (sin(glfwGetTime() * 10) * 0.5f) + 0.5f);
@@ -112,6 +115,9 @@ int main(int argc, char* argv[]) {
 		shader));
 
 	SWLOG("Starting main loop!");
+
+	cameraTransform.position = glm::vec3(0.0, 0.0, 4.0);
+
 	// Main rendering loop
 	while (!glfwWindowShouldClose(window)) {
 		// Logic loop

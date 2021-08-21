@@ -8,13 +8,12 @@ Renderable::Renderable(std::vector<float> vertices, std::vector<unsigned int> in
 	CreateEBO(indices);
 	CreateVAO();
 	this->shader = shader;
-	transform = glm::mat4(1.0f);
 }
 
 void Renderable::render()
 {
 	shader->activate();
-	shader->setMat4("transform", transform);
+	shader->setMat4("transform", transform.getWorldMatrix());
 	glBindVertexArray(VAO);
 	glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0);
 }
