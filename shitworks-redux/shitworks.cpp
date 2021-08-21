@@ -87,7 +87,7 @@ int main(int argc, char* argv[]) {
 
 	shader = new Shader("default.vertex", "default.fragment");
 	cabbage = new Texture("cabbage_lady.png");
-	gopnik = new Texture("gopnik.jpg");https://www.youtube.com/watch?v=slXHhu86SaY&t=11s
+	gopnik = new Texture("gopnik.jpg");
 
 	renderables.push_back(Renderable(
 		{
