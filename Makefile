@@ -10,7 +10,7 @@ DEPS := $(OBJS:.o=.d)
 INC_DIRS := include
 INC_FLAGS := $(addprefix -I,$(INC_DIRS)) 
 
-CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
+CPPFLAGS ?= $(INC_FLAGS) -MMD -MP -std=c++17
 CXXFLAGS ?= -std=c++17
 LDFLAGS ?= -lglfw -lGL -lX11 -lpthread -lXrandr -lXi -ldl -lstdc++ -lm
 
@@ -25,13 +25,13 @@ $(BUILD_DIR)/%.c.o: %.c
 # c++ source
 $(BUILD_DIR)/%.cpp.o: %.cpp
 	$(MKDIR_P) $(dir $@)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
-
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS`) -c $< -o $@
 
 .PHONY: clean
 
 clean:
-	$(RM) -r $(BUILD_DIR)
+	$(RM) -r $(BUILD_DIR)/shitworks-redux
+	$(RM) $(BUILD_DIR)/a.out
 
 -include $(DEPS)
 
