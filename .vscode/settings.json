@@ -1,0 +1,10 @@
+{
+    "makefile.extensionOutputFolder": "./.vscode",
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "/home/dankons/repos/shitworks-redux/build",
+            "binaryPath": "/home/dankons/repos/shitworks-redux/build/a.out",
+            "binaryArgs": []
+        }
+    ]
+}
